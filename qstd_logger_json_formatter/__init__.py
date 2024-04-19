@@ -59,7 +59,7 @@ class JsonFormatter(logging.Formatter):
             record.message = record.msg
             if not record.args:
                 record.payload = None
-            elif len(record.args) == 1:
+            elif isinstance(record.args, tuple) and len(record.args) == 1:
                 record.payload = record.args[0]
             else:
                 record.payload = record.args
