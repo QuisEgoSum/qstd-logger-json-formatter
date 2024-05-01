@@ -20,6 +20,8 @@ class JsonFormatter(logging.Formatter):
     default_time_format = "%Y-%m-%dT%H:%M:%S"
     msec_format = "%s.%03dZ"
 
+    json_dumps = dict(default=str)
+
     FORMATTERS: typing.Dict[str, typing.Callable[[LogRecord], dict]] = dict()
     ROOT_FORMATTERS: typing.Dict[str, typing.Callable[[LogRecord], dict]] = dict()
     PARSE_PAYLOAD_ROOT_LOGGER: typing.Set[str] = set()
@@ -53,6 +55,11 @@ class JsonFormatter(logging.Formatter):
             timestamp=record.asctime
         )
 
+    @classmethod
+    def set_json_dumps(cls, **kwargs):
+        cls.json_dumps = kwargs
+        return cls
+
     def format(self, record: LogRecord) -> str:
         root_name = record.name.split('.')[0]
         if root_name in self.PARSE_PAYLOAD_ROOT_LOGGER:
@@ -85,7 +92,7 @@ class JsonFormatter(logging.Formatter):
             log_dict["exc_info"] = record.exc_text
         if record.stack_info:
             log_dict["stack_info"] = self.formatStack(record.stack_info)
-        return json.dumps(log_dict, default=str)
+        return json.dumps(log_dict, **self.json_dumps)
 
 
 def configure(formatter_cls: typing.Type[JsonFormatter]):
