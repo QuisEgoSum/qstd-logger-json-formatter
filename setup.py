@@ -8,7 +8,7 @@ def readme():
 
 setup(
     name='qstd_logger_json_formatter',
-    version='0.1.2',
+    version='0.2.0',
     author='QuisEgoSum',
     author_email='subbotin.evdokim@gmail.com',
     description='Logging json formatter',
