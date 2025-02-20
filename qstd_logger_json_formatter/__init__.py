@@ -60,7 +60,11 @@ class JsonFormatter(logging.Formatter):
         cls.json_dumps = kwargs
         return cls
 
-    def format(self, record: LogRecord) -> str:
+    @classmethod
+    def get_trace_ids(cls):
+        return get_trace_ids()
+
+    def _format(self, record: LogRecord) -> dict:
         root_name = record.name.split('.')[0]
         if root_name in self.PARSE_PAYLOAD_ROOT_LOGGER:
             record.message = record.msg
@@ -74,7 +78,7 @@ class JsonFormatter(logging.Formatter):
             record.message = record.getMessage()
             record.payload = None
         record.asctime = self.formatTime(record, self.datefmt)
-        record.trace_ids = get_trace_ids()
+        record.trace_ids = self.get_trace_ids()
         if record.name in self.FORMATTERS:
             log_dict = self.FORMATTERS[record.name](record)
         elif root_name in self.ROOT_FORMATTERS:
@@ -92,7 +96,10 @@ class JsonFormatter(logging.Formatter):
             log_dict["exc_info"] = record.exc_text
         if record.stack_info:
             log_dict["stack_info"] = self.formatStack(record.stack_info)
-        return json.dumps(log_dict, **self.json_dumps)
+        return log_dict
+
+    def format(self, record: LogRecord) -> str:
+        return json.dumps(self._format(record), **self.json_dumps)
 
 
 def configure(formatter_cls: typing.Type[JsonFormatter]):
